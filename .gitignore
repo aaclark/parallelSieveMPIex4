@@ -1,0 +1,58 @@
+#======== Do not edit these lines
+# Executables and files without extension:
+# Ignore all; then unignore all with extensions; and all dirs
+*
+!*.*
+!*/
+#================================
+
+# Specific dirs to ignore
+documents
+include
+lib
+
+# Benchmark files
+benchmark_results.txt
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### CLion ###
+.idea
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+# CMake
+cmake-build-*/
+# IntelliJ
+out/
