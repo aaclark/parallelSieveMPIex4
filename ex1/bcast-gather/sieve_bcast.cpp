@@ -99,13 +99,12 @@ int main(int argc, char *argv[]) {
     int range_size = (range_end_incl - range_start_incl) + 1;
 
     // Stack-allocate space for one worker's primes and initialize
-    bool worker_primes[range_size];
-    for (int i = 0; i < range_size; i++) worker_primes[i] = true;
+    bool local_primes[range_size];
+    for (int i = 0; i < range_size; i++) local_primes[i] = true;
 
     // Stack-allocate space for gathering results (only for rank 0)
     bool global_primes[MAX_N + 1];
     if (!rank) { for (int i = 0; i <= N; i++) { global_primes[i] = false; }}
-
 
     //Set up precision timer
     using std::chrono::high_resolution_clock;
@@ -133,13 +132,13 @@ int main(int argc, char *argv[]) {
                     // determine the smallest multiple of prime that is >= range_start; and smallest_multiple at that offset for prime
                     int smallest_multiple = (range_start_incl % prime == 0) ? range_start_incl : range_start_incl + (prime - (range_start_incl % prime));
                     if (smallest_multiple == prime) smallest_multiple += prime; // Avoid marking the prime itself
-                    mark_multiples_parallel(worker_primes, range_start_incl, range_end_incl, prime, smallest_multiple);
+                    mark_multiples_parallel(local_primes, range_start_incl, range_end_incl, prime, smallest_multiple);
                 }
             }
 
         }
         // Gather results back to the root process
-        MPI_Gather(worker_primes, range_size, MPI_CXX_BOOL,
+        MPI_Gather(local_primes, range_size, MPI_CXX_BOOL,
                    global_primes + range_start_incl, range_size, MPI_CXX_BOOL,
                    0, MPI_COMM_WORLD);
 

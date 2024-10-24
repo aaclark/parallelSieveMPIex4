@@ -106,7 +106,6 @@ int main(int argc, char *argv[]) {
     bool* global_primes = (bool*)malloc((N + 1) * sizeof(bool));
     if (!rank) { for (int i = 0; i <= N; i++) { global_primes[i] = false; }}
 
-
     //Set up precision timer
     using std::chrono::high_resolution_clock;
     using std::chrono::duration_cast;
