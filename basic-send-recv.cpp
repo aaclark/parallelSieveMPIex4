@@ -18,14 +18,19 @@ int do_work(int init_rank) {
 }
 
 int main(int argc, char *argv[]) {
-    int rank, size, N;
+    int rank, size;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    // Initialize "work" variables
     int* ret_vals = (int*)malloc(size * sizeof(int));
     int work_val = -1;
+
+    //Set up precision timer
+    using std::chrono::milliseconds;
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     /**
      * The master process sends each worker an index (address) into the ret_vals array, initialized with worker rank:
@@ -73,15 +78,31 @@ int main(int argc, char *argv[]) {
     // is this required?
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // Stop the clock!
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto elapsed_time_ms = std::chrono::duration<double, std::milli> (t2 - t1).count();
+
+    // Print the "results"
     if (!rank) {
         for (int worker_rank=0; worker_rank < size; ++worker_rank) {
             printf("%d ", ret_vals[worker_rank]);
         }
+        printf("\n");
     }
 
+    // Clean up
     free(ret_vals);
 
+    // Finalize MPI environment
     MPI_Finalize();
+
+    // Print net runtime of running <STUFF>
+    if(!rank) {
+        std::cout << std::left<< std::setfill(' ')
+                  << " size= " << std::setw(12) << std::setprecision(4) << size
+                  << " elapsed= " << std::setw(12) << std::setprecision(4) << elapsed_time_ms << " ms "
+                  << std::endl;
+    }
 
     return 0;
 
