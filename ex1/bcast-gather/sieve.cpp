@@ -124,12 +124,12 @@ int main(int argc, char *argv[]) {
             /** PARALLEL SECTION */
 
             // Each process marks multiples of small primes in its range
-            for (int p = 2; p <= sqrt_N; p++) { // Why did we keep 0, 1 here...?
+            for (int p = 2; p <= sqrt_N; p++) { // Skip 0, 1
                 if (small_primes[p]) {
-                    // determine the smallest multiple of p that is >= range_start; and start at that offset for p
-                    int start = (range_start % p == 0) ? range_start : range_start + (p - (range_start % p));
-                    if (start == p) start += p; // Avoid marking the prime itself
-                    mark_multiples_parallel(prime_array, start - range_start, p, range_size);
+                    // determine the smallest multiple of p that is >= range_start; and smallest_multiple at that offset for p
+                    int smallest_multiple = (range_start % p == 0) ? range_start : range_start + (p - (range_start % p));
+                    if (smallest_multiple == p) smallest_multiple += p; // Avoid marking the prime itself
+                    mark_multiples_parallel(prime_array, smallest_multiple, p, range_end);
                 }
             }
 
