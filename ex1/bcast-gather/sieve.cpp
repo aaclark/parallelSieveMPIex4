@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     auto elapsed_time_ms = duration<double, std::milli> (t2 - t1).count();
 
     // Output the results (in rank 0)
-    if (rank == 0) {
+    if (!rank) {
         for (int i = 2; i <= N; i++) {
             if (global_primes[i] && WRITEOUT) printf("%d ", i);
         }
