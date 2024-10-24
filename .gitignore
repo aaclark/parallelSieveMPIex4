@@ -12,7 +12,7 @@ include
 lib
 
 # Benchmark files
-benchmark_results.txt
+*.txt
 
 ### C++ ###
 # Prerequisites
