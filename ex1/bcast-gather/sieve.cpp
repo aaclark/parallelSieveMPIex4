@@ -30,31 +30,36 @@ typedef enum {
 
 
 // Iterate all primes within range
-void mark_multiples_sequential(bool* marked_numbers, int max) {
+void mark_multiples_sequential(bool *marked_numbers, int start_incl, int stop_incl) {
     /**
      * Assume each integer p = 1...sqrt(MAX) is prime,
      * Then for each integer p = 1...sqrt(MAX):
      *      For each multiple i of p, i = p*p, p*p+p, p*p+2p, ... sqrt(MAX):
      *          Mark i as non-prime
      */
-    for (int i = 2; i <= max; i++) marked_numbers[i] = true;  // Initialize all to true (prime)
+    for (int i = start_incl; i <= stop_incl; i++) marked_numbers[i] = true;  // Initialize all to true (prime)
 
-    for (int p = 2; p <= max; p++) { // For each integer p...
+    for (int p = start_incl; p <= stop_incl; p++) { // For each integer p...
         if (marked_numbers[p]) {    // IF it is prime...
-            for (int i = p * p; i <= max; i += p) marked_numbers[i] = false;  // Mark multiples as non-prime
+            for (int i = p * p; i <= stop_incl; i += p) marked_numbers[i] = false;  // Mark multiples as non-prime
         }
     }
+
+    // Prime but not counted
+    marked_numbers[0] = false;
+    marked_numbers[1] = false;
 }
 
 
 // Iterate over multiples of a given prime
-void mark_multiples_parallel(bool *marked_numbers, int start, int prime, int limit) {
+void mark_multiples_parallel(bool *marked_numbers, int start_incl, int end_incl, int prime, int smallest_multiple) {
     /**
      * For each multiple i of p, i = p, 2p, 3p, ... limit:
      *      Mark i as non-prime
      */
-    for (int i = start; i < limit; i += prime) {
-        marked_numbers[i] = false;
+    for (int i = smallest_multiple; i <= end_incl; i += prime) {
+        // Convert back to indices of the worker's much smaller array
+        marked_numbers[i - start_incl] = false;
     }
 }
 
@@ -88,20 +93,18 @@ int main(int argc, char *argv[]) {
     int sqrt_N = (int)sqrt(N);
 
     // Each process has a unique rank and can compute its own start and end (inclusive) indices
-    int range_start =   (rank)      * (N / size) + 2; // Offset
-    int range_end =     (rank + 1)  * (N / size) + 1; // (rank + 1) * (N / size) + 2 - 1;
-    if (rank == size - 1) range_end = N; // Truncate the last section
+    int range_start_incl = (rank) * (N / size) + 2;
+    int range_end_incl = (rank + 1) * (N / size) + 1;
+    if (rank == size - 1) range_end_incl = N; // Truncate the last section
+    int range_size = (range_end_incl - range_start_incl) + 1;
 
-    // TODO do we need to allocate dynamically???
-    int range_size = range_end - range_start + 1;
-    bool prime_array[range_size]; // = malloc...
-
-    // This array is UNIQUE TO EACH WORKER; initialize...
-    for (int i = 0; i < range_size; i++) prime_array[i] = true;
+    // Stack-allocate space for one worker's primes and initialize
+    bool worker_primes[range_size];
+    for (int i = 0; i < range_size; i++) worker_primes[i] = true;
 
     // Stack-allocate space for gathering results (only for rank 0)
-    bool global_primes[MAX_N + 1];  // Large enough to hold results up to MAX_N
-    if (!rank) { for (int i = 0; i <= N; i++) { global_primes[i] = false; }}  // Initialize global array
+    bool global_primes[MAX_N + 1];
+    if (!rank) { for (int i = 0; i <= N; i++) { global_primes[i] = false; }}
 
 
     //Set up precision timer
@@ -115,28 +118,30 @@ int main(int argc, char *argv[]) {
         // Stack-allocate array for small primes (handled by rank 0)
         bool small_primes[sqrt_N + 1];
         if (!rank) {
-            mark_multiples_sequential(small_primes, sqrt_N);
+            mark_multiples_sequential(small_primes, 2, sqrt_N);
         }
 
         // Broadcast small primes to all processes
-        MPI_Bcast(small_primes, sqrt_N + 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);
+        MPI_Bcast(small_primes, sqrt_N + 1, MPI_CXX_BOOL,
+                  0, MPI_COMM_WORLD);
         {
             /** PARALLEL SECTION */
 
             // Each process marks multiples of small primes in its range
-            for (int p = 2; p <= sqrt_N; p++) { // Skip 0, 1
-                if (small_primes[p]) {
-                    // determine the smallest multiple of p that is >= range_start; and smallest_multiple at that offset for p
-                    int smallest_multiple = (range_start % p == 0) ? range_start : range_start + (p - (range_start % p));
-                    if (smallest_multiple == p) smallest_multiple += p; // Avoid marking the prime itself
-                    mark_multiples_parallel(prime_array, smallest_multiple, p, range_end);
+            for (int prime = 2; prime <= sqrt_N; prime++) { // Skip 0, 1
+                if (small_primes[prime]) {
+                    // determine the smallest multiple of prime that is >= range_start; and smallest_multiple at that offset for prime
+                    int smallest_multiple = (range_start_incl % prime == 0) ? range_start_incl : range_start_incl + (prime - (range_start_incl % prime));
+                    if (smallest_multiple == prime) smallest_multiple += prime; // Avoid marking the prime itself
+                    mark_multiples_parallel(worker_primes, range_start_incl, range_end_incl, prime, smallest_multiple);
                 }
             }
 
         }
         // Gather results back to the root process
-        MPI_Gather(prime_array, range_size, MPI_CXX_BOOL, global_primes + range_start - 2, range_size, MPI_CXX_BOOL, 0,
-                   MPI_COMM_WORLD);
+        MPI_Gather(worker_primes, range_size, MPI_CXX_BOOL,
+                   global_primes + range_start_incl, range_size, MPI_CXX_BOOL,
+                   0, MPI_COMM_WORLD);
 
     }
     // Stop the clock!

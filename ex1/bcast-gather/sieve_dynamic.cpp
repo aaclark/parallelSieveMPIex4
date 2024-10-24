@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
     // Each process has a unique rank and can compute its own start and end (inclusive) indices
     int range_start_incl = (rank) * (N / size) + 2;
     int range_end_incl = (rank + 1) * (N / size) + 1;
-    int range_size = (range_end_incl - range_start_incl) + 1;
     if (rank == size - 1) range_end_incl = N; // Truncate the last section
+    int range_size = (range_end_incl - range_start_incl) + 1;
 
     // Allocate space for one worker's primes and initialize
     bool* local_primes = (bool*)malloc((range_size) * sizeof(bool));
