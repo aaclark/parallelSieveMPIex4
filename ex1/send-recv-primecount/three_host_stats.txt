@@ -1,0 +1,24 @@
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 10000000 took 0.547593 seconds:
+The sequential part took 0.000107 seconds:
+The parallel part took 0.547486 seconds:
+
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 20000000 took 0.911873 seconds:
+The sequential part took 0.000158 seconds:
+The parallel part took 0.911715 seconds:
+
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 40000000 took 1.785000 seconds:
+The sequential part took 0.000432 seconds:
+The parallel part took 1.784568 seconds:
+
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 80000000 took 3.763573 seconds:
+The sequential part took 0.000253 seconds:
+The parallel part took 3.763320 seconds:
+
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 160000000 took 9.127035 seconds:
+The sequential part took 0.000341 seconds:
+The parallel part took 9.126694 seconds:
+
+Using 96 processes to find all the primes for the natural numbers in the range 1 to 320000000 took 23.457709 seconds:
+The sequential part took 0.000471 seconds:
+The parallel part took 23.457238 seconds:
+
