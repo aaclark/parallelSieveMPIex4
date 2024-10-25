@@ -135,13 +135,13 @@ int main(int argc, char *argv[]) {
                     mark_multiples_parallel(local_primes, range_start_incl, range_end_incl, prime, smallest_multiple);
                 }
             }
-
         }
+        MPI_Barrier(MPI_COMM_WORLD);
+
         // Gather results back to the root process
         MPI_Gather(local_primes, range_size, MPI_CXX_BOOL,
-                   global_primes + range_start_incl, range_size, MPI_CXX_BOOL,
+                   &global_primes[range_start_incl], range_size, MPI_CXX_BOOL,
                    0, MPI_COMM_WORLD);
-
     }
     // Stop the clock!
     auto t2 = high_resolution_clock::now();

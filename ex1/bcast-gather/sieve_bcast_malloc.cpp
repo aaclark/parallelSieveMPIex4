@@ -19,7 +19,7 @@
 
 #include <mpi.h>
 
-#define MAX_N 100000000000  // Define a maximum N value
+#define MAX_N 1000000  // Define a maximum N value
 #define WRITEOUT false // debugging...
 
 typedef enum {
@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
         // Allocate array for small primes including sqrt(N) (handled by rank 0)
         bool* small_primes = (bool*)malloc((sqrt_N + 1) * sizeof(bool));
         if (!rank) {
+            for (int i = 0; i <= sqrt_N; i++) { small_primes[i] = false; }
             mark_multiples_sequential(small_primes, 2, sqrt_N);
         }
 
@@ -132,21 +133,19 @@ int main(int argc, char *argv[]) {
                     // smallest multiple of p, (p*k) >= range_start; start at that offset
                     int min_pk = (range_start_incl % p == 0) ? range_start_incl : range_start_incl + (p - (range_start_incl % p)) ;
                     if (min_pk == p) min_pk += p; // Avoid marking the p itself (trivial k==1)
-
-                    // Map from the global starting point to the local starting point
                     mark_multiples_parallel(local_primes, range_start_incl, range_end_incl, p, min_pk);
                 }
             }
-
         }
+        MPI_Barrier(MPI_COMM_WORLD);
+
         // Gather results back to the root process
         MPI_Gather(local_primes, range_size, MPI_CXX_BOOL,
-                   global_primes + range_start_incl, range_size, MPI_CXX_BOOL,
+                   &global_primes[range_start_incl], range_size, MPI_CXX_BOOL,
                    0, MPI_COMM_WORLD);
 
         // Clean up
         free(small_primes);
-
     }
     // Stop the clock!
     auto t2 = high_resolution_clock::now();

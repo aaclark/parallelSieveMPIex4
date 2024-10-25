@@ -117,22 +117,12 @@ int main(int argc, char *argv[]) {
         bool small_primes[sqrt_N + 1];
         if (!rank) {
             mark_multiples_sequential(small_primes, 2, sqrt_N);
-        }
-
-//        // Broadcast small primes to all processes
-//        MPI_Bcast(small_primes, sqrt_N + 1, MPI_CXX_BOOL,
-//                  0, MPI_COMM_WORLD);
-
-        if (!rank) { // rank-0 is master
             for (int dest=1; dest < size; ++dest) { // 1, ... size-1
-//                ret_vals[dest] = dest; // initialize: "you are number X"
                 MPI_Send(small_primes, sqrt_N + 1, MPI_CXX_BOOL, dest, TAG_WORKER_DISPATCH, MPI_COMM_WORLD);
             }
-            // Master process "initializes" its work_val equal to its rank
-//            work_val = 0;
         } else {
             // "Initialize" work_val to whatever is received from master process
-            MPI_Recv(small_primes, sqrt_N + 1, MPI_INT, 0, TAG_WORKER_DISPATCH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(small_primes, sqrt_N + 1, MPI_CXX_BOOL, 0, TAG_WORKER_DISPATCH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
 
         {
@@ -147,28 +137,16 @@ int main(int argc, char *argv[]) {
                     mark_multiples_parallel(local_primes, range_start_incl, range_end_incl, prime, smallest_multiple);
                 }
             }
-
         }
-
-
-
-//        // Gather results back to the root process
-//        MPI_Gather(local_primes, range_size, MPI_CXX_BOOL,
-//                   global_primes + range_start_incl, range_size, MPI_CXX_BOOL,
-//                   0, MPI_COMM_WORLD);
 
         if (!rank) { // rank-0 is master
             for (int source=1; source < size; ++source) { // 1, ... size-1
                 MPI_Recv(global_primes + range_start_incl, range_size, MPI_CXX_BOOL, source, TAG_WORKER_RETURN, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
-            // Master process performs a different operation than the workers, none of which are "aware" of this array
-//            ret_vals[0] = work_val;
         } else {
             // Send the result of "doing some work" back to master process
             MPI_Send(local_primes, range_size, MPI_CXX_BOOL, 0, TAG_WORKER_RETURN, MPI_COMM_WORLD);
         }
-
-
     }
     // Stop the clock!
     auto t2 = high_resolution_clock::now();
