@@ -16,10 +16,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <chrono>
 
 #include <mpi.h>
 
-#define MAX_N 1000000  // Define a maximum N value
+#define MAX_N 1000000000000  // Define a maximum N value
 #define WRITEOUT false // debugging...
 
 typedef enum {
