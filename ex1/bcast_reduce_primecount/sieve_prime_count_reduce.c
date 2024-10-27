@@ -110,7 +110,6 @@ int main (int argc, char ** argv) {
   int* prime_numbers_sequential = NULL;
   int worker_from, worker_to, nr_of_prime_numbers_sequential;
   int* worker_ranges_from = (int*)malloc(size * sizeof(int));
-  int local_prime_count=0;//Each process counts its primes
   int total_prime_count=0;
   int sequential_max = ceil(sqrt(max)); // Round upward to ensure sequential_max*sequential_max <= max
   int total_range = max - sequential_max;
