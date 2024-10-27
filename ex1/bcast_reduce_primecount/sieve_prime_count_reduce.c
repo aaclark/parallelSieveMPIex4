@@ -161,7 +161,6 @@ int main (int argc, char ** argv) {
   // Step 1: Broadcast nr_of_prime_numbers_sequential
   MPI_Bcast(&nr_of_prime_numbers_sequential, 1, MPI_INT, 0, MPI_COMM_WORLD);
   
-  printf("rank %d NR_OF_PRIME_NUMBERS %d\n", rank, nr_of_prime_numbers_sequential);
   // Step 2: Allocate prime_numbers_sequential on non-root ranks only
   if (rank != 0) {
     prime_numbers_sequential = (int*)malloc(nr_of_prime_numbers_sequential * sizeof(int));
