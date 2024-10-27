@@ -136,8 +136,12 @@ sieve_bcast_malloc: ex1/bcast-gather/sieve_bcast_malloc.cpp
 	mpicxx -o "$@" ex1/bcast-gather/sieve_bcast_malloc.cpp
 
 
-basic-send-recv:
-	mpicxx -o "$@" basic-send-recv.cpp
+basic-send-recv: ex1/parallel-structure/basic-send-recv.cpp
+	mpicxx -o "$@" ex1/parallel-structure/basic-send-recv.cpp
+
+
+basic-bcast-gather: ex1/parallel-structure/basic-bcast-gather.cpp
+	mpicxx -o "$@" ex1/parallel-structure/basic-bcast-gather.cpp
 
 
 .PHONY: help
