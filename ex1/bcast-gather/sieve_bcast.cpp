@@ -156,9 +156,6 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
-    // Finalize the MPI environment
-    MPI_Finalize();
-
     if(!rank) {
         // Print results and net runtime of running <STUFF>
         std::cout << std::left<< std::setfill(' ')
@@ -166,6 +163,9 @@ int main(int argc, char *argv[]) {
                   << " elapsed= " << std::setw(12) << std::setprecision(4) << elapsed_time_ms << " ms "
                   << std::endl;
     }
+
+    // Finalize the MPI environment
+    MPI_Finalize();
 
     return 0;
 }
