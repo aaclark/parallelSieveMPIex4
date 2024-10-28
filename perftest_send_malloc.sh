@@ -24,10 +24,10 @@ for N in "${max_n[@]}"; do
     result=$(mpiexec -np "$procs" ./sieve_send_malloc "$N")
 
     # Append the result to the output file
-    echo "$result" >> $output_file
+    echo "P=${procs}$result" >> $output_file
   done
   result=$(mpiexec -np 96 --hostfile hosts ./sieve_send_malloc "$N")
-  echo "$result" >> $output_file
+  echo "P=96 $result" >> $output_file
 done
 
 echo "Benchmarking complete! Results written to $output_file"
