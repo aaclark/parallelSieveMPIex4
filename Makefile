@@ -110,7 +110,7 @@ LDFLAGS +=  -lm #-L"$(shell realpath ./lib)"
 # Using @ at the start of an action tells Make not to print this action
 
 # Build Targets
-TARGETS	= sieve  sieve_send sieve_send_malloc  sieve_bcast sieve_bcast_malloc
+TARGETS	= sieve_send_malloc sieve_bcast_malloc
 
 .PHONY: all
 all: depend $(TARGETS)
