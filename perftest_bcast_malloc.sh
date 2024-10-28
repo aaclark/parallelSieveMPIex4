@@ -4,7 +4,7 @@
 output_file="benchmark_results_bcast_malloc.txt"
 
 # Number of threads to test
-proc_counts=(1 2 4 8 16 32 96)
+proc_counts=(1 2 4 8 16 32)
 
 # Max
 max_n=(10000000 20000000 40000000 80000000 160000000 320000000)
@@ -14,8 +14,8 @@ echo "" > $output_file
 
 typeset -i N procs
 # Run the benchmarks
-for procs in "${proc_counts[@]}"; do
-  for N in "${max_n[@]}"; do
+for N in "${max_n[@]}"; do
+  for procs in "${proc_counts[@]}"; do
     # Set the number of threads for OpenMP
     export OMP_NUM_THREADS=procs
     echo "P=${procs}, N=${N}"
@@ -26,6 +26,7 @@ for procs in "${proc_counts[@]}"; do
     # Append the result to the output file
     echo "$result" >> $output_file
   done
+  result=$(mpiexec -np 96 --hostfile hosts ./sieve_bcast_malloc "$N")
 done
 
 echo "Benchmarking complete! Results written to $output_file"
