@@ -27,6 +27,7 @@ for N in "${max_n[@]}"; do
     echo "$result" >> $output_file
   done
   result=$(mpiexec -np 96 --hostfile hosts ./sieve_bcast_malloc "$N")
+  echo "$result" >> $output_file
 done
 
 echo "Benchmarking complete! Results written to $output_file"
