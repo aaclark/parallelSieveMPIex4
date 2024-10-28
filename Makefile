@@ -116,10 +116,6 @@ TARGETS	= sieve  sieve_send sieve_send_malloc  sieve_bcast sieve_bcast_malloc
 all: depend $(TARGETS)
 
 
-sieve: ex1/send-recv/sieve.c
-	mpicc -o "$@" ex1/send-recv/sieve.c
-
-
 sieve_send: ex1/send-recv/sieve_send.cpp
 	mpicxx -o "$@" ex1/send-recv/sieve_send.cpp
 
